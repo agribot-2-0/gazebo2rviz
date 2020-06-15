@@ -53,7 +53,8 @@ def link2marker_msg(link, full_linkname, use_collision = False, lifetime = rospy
         resource = linkpart.geometry_data['uri'].replace('model://', models_path + '/')
         #print('resource: %s' % resource)
         if os.path.isfile(resource):
-          marker_msg.mesh_resource = 'file://' + resource
+          path_in_package = resource.split('gazebo2rviz/meshes/')[-1]
+          marker_msg.mesh_resource = 'package://gazebo2rviz/meshes/' + path_in_package
           #print('found resource %s at %s' % (linkpart.geometry_data['uri'], resource))
           break
       # support URDF-like resource paths starting with model://

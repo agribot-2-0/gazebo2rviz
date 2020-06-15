@@ -55,8 +55,12 @@ def on_link_states_msg(link_states_msg):
         rospy.loginfo('Unable to load model: %s' % model_name)
     model = model_cache[model_name]
     link_name_in_model = link_name.replace(modelinstance_name + '::', '')
+    link_name_in_model_v2 = link_name_in_model
+    if '::' in link_name_in_model_v2:
+      link_name_in_model_v2 = link_name_in_model_v2.split('::')[-1]
+
     if model:
-      link = model.get_link(link_name_in_model)
+      link = model.get_link(link_name_in_model_v2)
       if link.tree_parent_joint:
         parent_link = link.tree_parent_joint.tree_parent_link
         parent_link_name = parent_link.get_full_name()
@@ -74,6 +78,11 @@ def on_link_states_msg(link_states_msg):
     parent_pose = poses[parentinstance_link_name]
     rel_tf = concatenate_matrices(inverse_matrix(parent_pose), pose)
     translation, quaternion = pysdf.homogeneous2translation_quaternion(rel_tf)
+
+    if '::' in link_name:
+      splt = link_name.split('::')
+      if len(splt) > 1:
+        link_name = splt[0] + '::' + splt[-1]
     #print('Publishing TF %s -> %s: t=%s q=%s' % (pysdf.sdf2tfname(parentinstance_link_name), pysdf.sdf2tfname(link_name), translation, quaternion))
     tfBroadcaster.sendTransform(translation, quaternion, rospy.get_rostime(), pysdf.sdf2tfname(link_name), pysdf.sdf2tfname(parentinstance_link_name))
 
